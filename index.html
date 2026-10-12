@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduSpark | AI Study Companion</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    /* ─── DESIGN TOKENS ─── */
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --primary-light: #eff6ff;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --warning: #f59e0b;
+      --warning-light: #fef9c3;
+
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface2: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --text-faint: #94a3b8;
+
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1);
+
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: all .25s ease;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #334155;
+      --border: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
+      --primary-light: #1e3a5f;
+      --danger-light: #451a1a;
+      --success-light: #143521;
+      --warning-light: #3d310e;
+    }
+
+    /* ─── RESET ─── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background .3s ease, color .3s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { text-decoration: none; cursor: pointer; }
+    button { cursor: pointer; font-family: inherit; }
+
+    /* ─── NAVIGATION ─── */
+    nav {
+      background: var(--surface);
+      padding: .85rem 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: var(--shadow-sm);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+    }
+    .nav-center {
+      display: flex;
+      gap: 1.75rem;
+    }
+    .nav-center a {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: .92rem;
+      padding: .4rem .2rem;
+      border-bottom: 2px solid transparent;
+      transition: var(--transition);
+    }
+    .nav-center a:hover, .nav-center a.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    #theme-toggle {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+    #theme-toggle:hover { color: var(--primary); border-color: var(--primary); }
+    #hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.3rem;
+      padding: .25rem;
+    }
+
+    #mobile-nav {
+      display: none;
+      flex-direction: column;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: .5rem 5% 1rem;
+    }
+    #mobile-nav.open { display: flex; }
+    #mobile-nav a {
+      padding: .75rem 0;
+      color: var(--text-muted);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+    }
+    #mobile-nav a:last-child { border-bottom: none; }
+    #mobile-nav a:hover, #mobile-nav a.active { color: var(--primary); }
+
+    /* ─── CONTAINER & SECTIONS ─── */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 2rem 5%;
+      flex: 1;
+      width: 100%;
+    }
+    section { display: none; animation: fadeIn .35s ease; }
+    section.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── TYPOGRAPHY & BUTTONS ─── */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .page-header h2 { font-size: 1.65rem; font-weight: 700; }
+    .page-header p { color: var(--text-muted); font-size: .92rem; margin-top: .2rem; }
+
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      padding: .7rem 1.4rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: .92rem;
+      border: 1.5px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      transition: var(--transition);
+    }
+    .btn:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow); }
+    .btn-outline { background: transparent; color: var(--primary); border-color: var(--primary); }
+    .btn-outline:hover { background: var(--primary); color: #fff; }
+    .btn-sm { padding: .45rem .85rem; font-size: .82rem; }
+    .btn-danger { background: var(--danger); }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-success { background: var(--success); }
+    .btn-success:hover { background: #15803d; }
+
+    /* ─── FORM ELEMENTS ─── */
+    .tool-box {
+      background: var(--surface);
+      padding: 1.75rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+    .form-label {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text);
+      display: block;
+      margin-bottom: .45rem;
+    }
+    textarea, input[type="text"], select {
+      width: 100%;
+      padding: .8rem 1rem;
+      margin-bottom: .85rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: .93rem;
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      transition: border-color .2s;
+      outline: none;
+    }
+    textarea:focus, input[type="text"]:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+    textarea { resize: vertical; }
+    .input-meta {
+      display: flex;
+      justify-content: flex-end;
+      font-size: .75rem;
+      color: var(--text-faint);
+      margin-top: -.5rem;
+      margin-bottom: .85rem;
+    }
+
+    /* ─── HERO & CARDS ─── */
+    .hero { text-align: center; padding: 4rem 0 2.5rem; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: .8rem;
+      font-weight: 600;
+      padding: .35rem .9rem;
+      border-radius: 99px;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 800; line-height: 1.15; margin-bottom: 1.1rem; }
+    .hero h1 span { color: var(--primary); }
+    .hero p { font-size: 1.1rem; color: var(--text-muted); max-width: 540px; margin: 0 auto 2rem; }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    .card {
+      background: var(--surface);
+      padding: 1.85rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      text-align: center;
+      transition: var(--transition);
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    button.card { width: 100%; border: 1px solid var(--border); }
+    .card-icon {
+      width: 52px; height: 52px;
+      background: var(--primary-light);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.2rem;
+      font-size: 1.35rem;
+      color: var(--primary);
+    }
+    .card h3 { font-size: 1.1rem; margin-bottom: .45rem; }
+    .card p { color: var(--text-muted); font-size: .9rem; }
+
+    /* ─── DASHBOARD STATS ─── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .stat-card {
+      background: var(--primary);
+      color: #fff;
+      padding: 1.4rem;
+      border-radius: var(--radius);
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: -20px; right: -20px;
+      width: 75px; height: 75px;
+      background: rgba(255,255,255,.1);
+      border-radius: 50%;
+    }
+    .stat-card p { font-size: .8rem; opacity: .9; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .3rem; }
+    .stat-card h3 { font-size: 1.95rem; font-weight: 700; }
+
+    .activity-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-top: 2rem;
+    }
+    .activity-list h4 { padding: 1rem 1.4rem; border-bottom: 1px solid var(--border); font-size: .95rem; }
+    .activity-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .85rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+      font-size: .88rem;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; flex-shrink: 0;
+    }
+    .activity-item span:last-child { margin-left: auto; font-size: .78rem; color: var(--text-faint); }
+
+    /* ─── AI NOTES WORKFLOW ─── */
+    .notes-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .notes-layout { grid-template-columns: 1fr; }
+    }
+    .workflow-steps {
+      display: flex; align-items: center; gap: .6rem;
+      margin-bottom: 1.25rem; flex-wrap: wrap;
+    }
+    .step {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .8rem; font-weight: 600; color: var(--text-faint);
+    }
+    .step-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--border); color: var(--text-faint);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 700;
+    }
+    .step.done { color: var(--primary); }
+    .step.done .step-num { background: var(--primary); color: #fff; }
+    .step-arrow { color: var(--border); font-size: .75rem; }
+
+    .preview-panel {
+      background: var(--bg);
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-top: 1.25rem;
+      transition: var(--transition);
+    }
+    .preview-panel.has-content {
+      border-style: solid;
+      border-color: var(--primary);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+    .preview-panel-header {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .78rem; font-weight: 600; color: var(--text-faint);
+      margin-bottom: 1rem; text-transform: uppercase; letter-spacing: .05em;
+    }
+    .preview-placeholder {
+      text-align: center; padding: 2rem 0; color: var(--text-faint); font-size: .88rem;
+    }
+    
+    /* Structured Study Notes Presentation */
+    .study-note-render {
+      font-size: .93rem;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .note-doc-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      padding-bottom: .6rem;
+      border-bottom: 2px solid var(--primary-light);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .note-card-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.1rem;
+    }
+    .note-card-box.summary-box {
+      background: var(--primary-light);
+      border-color: rgba(37,99,235,0.2);
+    }
+    .note-sec-title {
+      font-size: .95rem;
+      font-weight: 700;
+      margin-bottom: .6rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+    }
+    .summary-box .note-sec-title {
+      color: var(--primary);
+    }
+    .note-bullet-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .note-bullet-item {
+      display: flex;
+      align-items: flex-start;
+      gap: .6rem;
+      font-size: .9rem;
+      color: var(--text);
+    }
+    .note-bullet-item i {
+      color: var(--primary);
+      font-size: .75rem;
+      margin-top: .35rem;
+      flex-shrink: 0;
+    }
+    .note-callout-warning {
+      background: var(--warning-light);
+      border-left: 3px solid var(--warning);
+      padding: .75rem 1rem;
+      border-radius: 4px;
+      font-size: .88rem;
+      margin-top: .85rem;
+      color: var(--text);
+    }
+    .note-numbered-list {
+      padding-left: 1.2rem;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+      font-size: .9rem;
+    }
+
+    .notes-sidebar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: sticky;
+      top: 80px;
+    }
+    .notes-sidebar-header {
+      padding: .9rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .sidebar-search { padding: .6rem 1rem; border-bottom: 1px solid var(--border); }
+    .sidebar-search input { margin: 0; padding: .45rem .75rem; font-size: .82rem; }
+    #notes-list { max-height: 440px; overflow-y: auto; }
+    .note-item {
+      padding: .85rem 1.2rem; border-bottom: 1px solid var(--border);
+      cursor: pointer; display: flex; align-items: flex-start; gap: .6rem;
+      transition: background .15s;
+    }
+    .note-item:last-child { border-bottom: none; }
+    .note-item:hover { background: var(--surface2); }
+    .note-item.active { background: var(--primary-light); border-left: 3px solid var(--primary); }
+    .note-item-body { flex: 1; min-width: 0; }
+    .note-item h5 { font-size: .86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note-item p { font-size: .75rem; color: var(--text-faint); margin-top: 2px; }
+
+    /* ─── QUIZ INTERACTIVE RUNNER ─── */
+    .quiz-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      margin-top: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .quiz-progress-bar-bg {
+      height: 8px; width: 100%;
+      background: var(--surface2);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+    }
+    .quiz-progress-bar-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width .3s ease;
+    }
+    .q-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .82rem; font-weight: 600; color: var(--text-faint); margin-bottom: .85rem;
+    }
+    .q-text {
+      font-size: 1.1rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--text);
+    }
+    .options-grid {
+      display: grid; gap: .75rem; margin-bottom: 1.5rem;
+    }
+    .option-btn {
+      padding: .9rem 1.2rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      color: var(--text);
+      text-align: left;
+      font-size: .95rem;
+      display: flex; align-items: center; gap: .8rem;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .option-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      font-weight: 600;
+    }
+    .option-btn.correct {
+      border-color: var(--success);
+      background: var(--success-light);
+      color: var(--success);
+      font-weight: 600;
+    }
+    .option-btn.incorrect {
+      border-color: var(--danger);
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+    .option-prefix {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1px solid currentColor; display: flex;
+      align-items: center; justify-content: center;
+      font-size: .78rem; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* Quiz Results Card */
+    .results-hero {
+      text-align: center; padding: 1.5rem 0;
+    }
+    .score-circle {
+      width: 110px; height: 110px; border-radius: 50%;
+      background: var(--primary-light); color: var(--primary);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      margin: 0 auto 1.25rem; border: 4px solid var(--primary);
+    }
+    .score-circle h2 { font-size: 2rem; line-height: 1; }
+    .score-circle p { font-size: .75rem; text-transform: uppercase; font-weight: 600; }
+
+    /* Saved scores table */
+    .history-table {
+      width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: .9rem;
+    }
+    .history-table th, .history-table td {
+      padding: .85rem 1rem; text-align: left; border-bottom: 1px solid var(--border);
+    }
+    .history-table th { color: var(--text-faint); font-size: .8rem; text-transform: uppercase; }
+
+    /* Badges */
+    .badge {
+      display: inline-block; padding: .25rem .6rem; border-radius: 99px; font-size: .75rem; font-weight: 600;
+    }
+    .badge-easy { background: var(--success-light); color: var(--success); }
+    .badge-medium { background: var(--warning-light); color: var(--warning); }
+    .badge-hard { background: var(--danger-light); color: var(--danger); }
+
+    /* ─── DOUBT SOLVER ─── */
+    .doubt-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .doubt-q { font-weight: 600; font-size: .98rem; margin-bottom: .6rem; color: var(--text); }
+    .doubt-a {
+      font-size: .9rem; line-height: 1.7; color: var(--text-muted);
+      background: var(--bg); padding: 1rem; border-radius: var(--radius-sm);
+      border-left: 3px solid var(--primary);
+    }
+    .doubt-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: .75rem; font-size: .75rem; color: var(--text-faint);
+    }
+
+    /* ─── COMMON UTILITIES ─── */
+    .empty-state {
+      text-align: center; padding: 2.5rem 1rem; color: var(--text-faint);
+    }
+    .empty-state i { font-size: 2.4rem; margin-bottom: .8rem; display: block; opacity: .7; }
+    .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+    #toast-container {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      display: flex; flex-direction: column; gap: .5rem; z-index: 9999;
+    }
+    .toast {
+      background: var(--text); color: var(--bg);
+      padding: .75rem 1.25rem; border-radius: var(--radius-sm);
+      font-size: .88rem; box-shadow: var(--shadow-lg); animation: slideUp .25s ease;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    footer {
+      text-align: center; padding: 2rem 5%; color: var(--text-faint);
+      font-size: .85rem; border-top: 1px solid var(--border); margin-top: auto;
+    }
+
+    @media (max-width: 768px) {
+      .nav-center { display: none; }
+      #hamburger { display: block; }
+      .hero { padding: 3rem 0 2rem; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVIGATION ── -->
+  <nav>
+    <div class="logo" onclick="showSection('landing')">
+      <i class="fas fa-brain"></i> EduSpark
+    </div>
+    <div class="nav-center">
+      <a onclick="showSection('landing')" id="link-landing">Home</a>
+      <a onclick="showSection('dashboard')" id="link-dashboard">Dashboard</a>
+      <a onclick="showSection('notes')" id="link-notes">AI Notes</a>
+      <a onclick="showSection('quiz')" id="link-quiz">AI Quiz</a>
+      <a onclick="showSection('solver')" id="link-solver">Doubt Solver</a>
+    </div>
+    <div class="nav-right">
+      <button id="theme-toggle" title="Toggle theme"><i class="fas fa-moon"></i></button>
+      <button id="hamburger" onclick="toggleMobileNav()" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    </div>
+  </nav>
+
+  <!-- Mobile Drawer -->
+  <div id="mobile-nav">
+    <a onclick="showSection('landing'); toggleMobileNav()" id="mob-link-landing">Home</a>
+    <a onclick="showSection('dashboard'); toggleMobileNav()" id="mob-link-dashboard">Dashboard</a>
+    <a onclick="showSection('notes'); toggleMobileNav()" id="mob-link-notes">AI Notes</a>
+    <a onclick="showSection('quiz'); toggleMobileNav()" id="mob-link-quiz">AI Quiz</a>
+    <a onclick="showSection('solver'); toggleMobileNav()" id="mob-link-solver">Doubt Solver</a>
+  </div>
+
+  <div class="container">
+
+    <!-- ══════════ LANDING ══════════ -->
+    <section id="landing" class="active">
+      <div class="hero">
+        <div class="hero-badge"><i class="fas fa-sparkles"></i> All-In-One Study Suite</div>
+        <h1>Study Smarter.<br><span>Learn Faster.</span></h1>
+        <p>Master any subject with instant structured notes, dynamic interactive quizzes with score tracking, and an instant conceptual doubt solver.</p>
+        <div class="hero-cta">
+          <button class="btn" onclick="showSection('dashboard')"><i class="fas fa-rocket"></i> Go to Dashboard</button>
+          <button class="btn btn-outline" onclick="showSection('quiz')"><i class="fas fa-vial"></i> Take a Quiz</button>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-icon"><i class="fas fa-file-alt"></i></div>
+          <h3>AI Notes Generator</h3>
+          <p>Transform lecture materials or topics into clean key takeaways and structured summaries.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon"><i class="fas fa-list-check"></i></div>
+          <h3>Interactive MCQs</h3>
+          <p>Generate topic-based quizzes, choose options, get instant score breakdowns, and retry anytime.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon"><i class="fas fa-comment-dots"></i></div>
+          <h3>Doubt Solver</h3>
+          <p>Stuck on an equation or concept? Receive clear bulleted breakdowns and explanations.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <section id="dashboard">
+      <div class="page-header">
+        <div>
+          <h2>Study Overview 👋</h2>
+          <p id="dash-date"></p>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="clearAllData()"><i class="fas fa-trash-alt"></i> Reset All Data</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <p>Saved Notes</p>
+          <h3 id="stat-notes">0</h3>
+        </div>
+        <div class="stat-card">
+          <p>Quizzes Completed</p>
+          <h3 id="stat-quizzes">0</h3>
+        </div>
+        <div class="stat-card">
+          <p>Avg Quiz Score</p>
+          <h3 id="stat-avg-score">0%</h3>
+        </div>
+        <div class="stat-card">
+          <p>Doubts Answered</p>
+          <h3 id="stat-doubts">0</h3>
+        </div>
+      </div>
+
+      <p style="font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin-bottom:1rem;">Quick Tools</p>
+      <div class="grid-3">
+        <button class="card" onclick="showSection('notes')">
+          <div class="card-icon"><i class="fas fa-pen-fancy"></i></div>
+          <h3>Create Notes</h3>
+          <p>Generate & save structured notes</p>
+        </button>
+        <button class="card" onclick="showSection('quiz')">
+          <div class="card-icon"><i class="fas fa-vial"></i></div>
+          <h3>Interactive Quiz</h3>
+          <p>Test knowledge & review performance</p>
+        </button>
+        <button class="card" onclick="showSection('solver')">
+          <div class="card-icon"><i class="fas fa-question-circle"></i></div>
+          <h3>Resolve Doubts</h3>
+          <p>Instant concept clarifying solver</p>
+        </button>
+      </div>
+
+      <div class="activity-list">
+        <h4>Recent Study Activity</h4>
+        <div id="activity-items">
+          <div class="empty-state">
+            <i class="fas fa-history"></i>
+            <p>No study logs found yet. Start generating notes or taking quizzes!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ AI NOTES ══════════ -->
+    <section id="notes">
+      <div class="page-header">
+        <div>
+          <h2>Smart Notes Studio</h2>
+          <p>Enter a topic or paste material to synthesize structured study notes.</p>
+        </div>
+      </div>
+
+      <div class="workflow-steps">
+        <div class="step" id="wf-step1"><div class="step-num">1</div> Topic</div>
+        <i class="fas fa-chevron-right step-arrow"></i>
+        <div class="step" id="wf-step2"><div class="step-num">2</div> Material</div>
+        <i class="fas fa-chevron-right step-arrow"></i>
+        <div class="step" id="wf-step3"><div class="step-num">3</div> Synthesize</div>
+        <i class="fas fa-chevron-right step-arrow"></i>
+        <div class="step" id="wf-step4"><div class="step-num">4</div> Copy &amp; Save</div>
+      </div>
+
+      <div class="notes-layout">
+        <div>
+          <div class="tool-box">
+            <label class="form-label" for="note-topic">
+              <i class="fas fa-tag" style="margin-right:.3rem; color:var(--primary);"></i>Topic / Subject
+            </label>
+            <input type="text" id="note-topic" placeholder="e.g., Photosynthesis, Newton's Laws, Microeconomics..." oninput="updateNotesWorkflow()" />
+
+            <label class="form-label" for="note-input">
+              <i class="fas fa-paste" style="margin-right:.3rem; color:var(--primary);"></i>Lecture / Textbook Excerpt
+              <span style="font-weight:400; color:var(--text-faint); font-size:.8rem;">(optional if generating directly from topic)</span>
+            </label>
+            <textarea id="note-input" rows="7" placeholder="Paste notes, transcripts, or leave blank to synthesize from topic..." oninput="updateNotesWorkflow()"></textarea>
+            <div class="input-meta"><span id="note-char-count">0 / 5000</span></div>
+
+            <div style="display:flex; gap:.75rem; flex-wrap:wrap; align-items:center;">
+              <button class="btn" id="generate-notes-btn" onclick="generateSmartNotes()">
+                <i class="fas fa-magic"></i> Generate Notes
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="clearNoteInputs()">Clear</button>
+            </div>
+          </div>
+
+          <!-- Note Preview Area -->
+          <div class="preview-panel" id="preview-panel">
+            <div class="preview-panel-header">
+              <span><i class="fas fa-eye" style="margin-right:.3rem;"></i>Generated Note Output</span>
+              <span id="preview-status">— Waiting for input</span>
+            </div>
+            <div id="preview-content-box">
+              <div class="preview-placeholder">
+                <i class="fas fa-robot" style="font-size:1.6rem; display:block; margin-bottom:.5rem; opacity:.4;"></i>
+                Synthesized notes will appear here with instant copy and library save options.
+              </div>
+            </div>
+            <div style="display:none; margin-top:1.25rem; gap:.6rem;" id="preview-actions">
+              <button class="btn btn-outline btn-sm" onclick="copyPreviewNotes()"><i class="fas fa-copy"></i> Copy Note</button>
+              <button class="btn btn-sm" onclick="savePreviewToLibrary()"><i class="fas fa-save"></i> Save to Library</button>
+              <button class="btn btn-outline btn-sm" onclick="discardPreview()" style="margin-left:auto;"><i class="fas fa-times"></i> Discard</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Notes Library -->
+        <div class="notes-sidebar">
+          <div class="notes-sidebar-header">
+            <h4 style="font-size:.95rem;"><i class="fas fa-book" style="margin-right:.4rem; color:var(--primary);"></i>Saved Notes</h4>
+            <span id="notes-count-label" style="font-size:.78rem; color:var(--text-faint);">0 saved</span>
+          </div>
+          <div class="sidebar-search">
+            <input type="text" id="notes-search" placeholder="🔍 Search library..." oninput="renderSavedNotes(this.value)" />
+          </div>
+          <div id="notes-list">
+            <div class="empty-state">
+              <i class="fas fa-sticky-note"></i>
+              <p>No saved notes yet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Note Viewer Modal / Tray -->
+      <div id="note-viewer" style="display:none; margin-top:1.5rem;">
+        <div class="tool-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem; margin-bottom:.85rem;">
+            <h4 id="viewer-title" style="font-size:1.1rem; color:var(--text);"></h4>
+            <div style="display:flex; gap:.5rem;">
+              <button class="btn btn-outline btn-sm" onclick="copyViewerNote()"><i class="fas fa-copy"></i> Copy</button>
+              <button class="btn btn-outline btn-sm" onclick="editSelectedNote()"><i class="fas fa-pen"></i> Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteCurrentNote()"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+          <div class="divider" style="margin:.4rem 0 1rem;"></div>
+          <div id="viewer-content" class="study-note-render"></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.2rem;">
+            <span id="viewer-meta" style="font-size:.75rem; color:var(--text-faint);"></span>
+            <button onclick="document.getElementById('note-viewer').style.display='none'; currentActiveNoteId=null; renderSavedNotes();"
+              style="background:none; border:none; font-size:.82rem; color:var(--text-faint); cursor:pointer;">Close Viewer ×</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ AI QUIZ ══════════ -->
+    <section id="quiz">
+      <div class="page-header">
+        <div>
+          <h2>Interactive Quiz Generator</h2>
+          <p>Generate practice questions, answer interactively, review scores, and retry.</p>
+        </div>
+      </div>
+
+      <div class="tool-box" id="quiz-config-card">
+        <label class="form-label" for="quiz-topic">
+          <i class="fas fa-graduation-cap" style="color:var(--primary); margin-right:.3rem;"></i>Quiz Topic
+        </label>
+        <input type="text" id="quiz-topic" placeholder="e.g., Cellular Respiration, World War I, Linear Algebra..." />
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+          <div>
+            <label class="form-label" for="quiz-difficulty">Difficulty</label>
+            <select id="quiz-difficulty">
+              <option value="Easy">Easy</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="quiz-qcount">Question Count</label>
+            <select id="quiz-qcount">
+              <option value="3">3 Questions (Quick)</option>
+              <option value="5" selected>5 Questions (Standard)</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn" id="start-quiz-btn" style="margin-top:.4rem;" onclick="startInteractiveQuiz()">
+          <i class="fas fa-play"></i> Start Quiz
+        </button>
+      </div>
+
+      <!-- Active Quiz Runner -->
+      <div id="quiz-runner" style="display:none;" class="quiz-card">
+        <div class="quiz-progress-bar-bg">
+          <div id="quiz-progress-fill" class="quiz-progress-bar-fill"></div>
+        </div>
+        <div class="q-meta">
+          <span id="q-counter">Question 1 of 5</span>
+          <span id="q-badge" class="badge badge-medium">Medium</span>
+        </div>
+        <div class="q-text" id="q-prompt">What is the main function of the mitochondria?</div>
+
+        <div class="options-grid" id="q-options-container">
+          <!-- Dynamically filled with options -->
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn btn-outline btn-sm" onclick="quitActiveQuiz()"><i class="fas fa-sign-out-alt"></i> Quit</button>
+          <button class="btn btn-sm" id="next-q-btn" onclick="nextQuestion()" disabled>
+            Next Question <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quiz Results Screen -->
+      <div id="quiz-results" style="display:none;" class="quiz-card">
+        <div class="results-hero">
+          <div class="score-circle">
+            <h2 id="result-score-num">0%</h2>
+            <p>Score</p>
+          </div>
+          <h3 id="result-feedback-title">Quiz Completed!</h3>
+          <p id="result-detail" style="color:var(--text-muted); font-size:.92rem; margin-top:.4rem;">You answered 4 out of 5 correctly.</p>
+
+          <div style="display:flex; justify-content:center; gap:.85rem; margin-top:1.5rem; flex-wrap:wrap;">
+            <button class="btn" onclick="retryCurrentQuiz()"><i class="fas fa-redo"></i> Retry Quiz</button>
+            <button class="btn btn-outline" onclick="showSection('quiz'); resetQuizToConfig();"><i class="fas fa-plus"></i> New Topic</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saved Score History -->
+      <div class="tool-box" style="margin-top:2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem;">
+          <h4 style="font-size:1rem;"><i class="fas fa-chart-line" style="color:var(--primary); margin-right:.4rem;"></i>Saved Quiz Scores</h4>
+          <span id="quiz-history-count" style="font-size:.78rem; color:var(--text-faint);">0 attempts logged</span>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="history-table" id="scores-table">
+            <thead>
+              <tr>
+                <th>Topic</th>
+                <th>Difficulty</th>
+                <th>Score</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="scores-tbody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+          <div id="empty-scores-state" class="empty-state">
+            <i class="fas fa-award"></i>
+            <p>No quiz scores logged yet. Complete a quiz to track your mastery!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ DOUBT SOLVER ══════════ -->
+    <section id="solver">
+      <div class="page-header">
+        <div>
+          <h2>AI Doubt Solver</h2>
+          <p>Get immediate explanations and structured concept answers for any study question.</p>
+        </div>
+      </div>
+
+      <div class="tool-box">
+        <label class="form-label" for="doubt-input">
+          <i class="fas fa-question-circle" style="color:var(--primary); margin-right:.3rem;"></i>Ask a Question or Struggle Concept
+        </label>
+        <textarea id="doubt-input" rows="4" placeholder="e.g. Why does boiling point increase with intermolecular forces? or Explain Heisenberg's Uncertainty Principle simply..."></textarea>
+        <div class="input-meta"><span id="doubt-chars">0 / 1000</span></div>
+
+        <button class="btn" id="solve-doubt-btn" onclick="solveDoubt()">
+          <i class="fas fa-lightbulb"></i> Explain &amp; Solve Doubt
+        </button>
+      </div>
+
+      <div style="margin-top:2rem;">
+        <h4 style="font-size:1rem; margin-bottom:1rem;"><i class="fas fa-comments" style="color:var(--primary); margin-right:.4rem;"></i>Resolved Doubts Archive</h4>
+        <div id="doubts-container">
+          <div class="empty-state" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);">
+            <i class="fas fa-comment-dots"></i>
+            <p>No doubts solved yet. Enter a concept above to get an instant explanation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div id="toast-container"></div>
+
+  <footer>
+    &copy; 2026 EduSpark &middot; Built with pair programming for student success &middot; Fast client-side AI engine ready for Gemini
+  </footer>
+
+<script>
+/* ─── STORAGE KEYS & CONSTANTS ─── */
+const DB_KEYS = {
+  notes: 'eduspark_notes_data',
+  quizzes: 'eduspark_quizzes_history',
+  doubts: 'eduspark_doubts_history',
+  streak: 'eduspark_study_streak',
+  lastVisit: 'eduspark_last_visit_date',
+  theme: 'eduspark_theme_setting'
+};
+
+/* ─── THEME HANDLING ─── */
+const themeBtn = document.getElementById('theme-toggle');
+const htmlRoot = document.documentElement;
+
+function applyAppTheme(t) {
+  htmlRoot.setAttribute('data-theme', t);
+  themeBtn.innerHTML = t === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+  localStorage.setItem(DB_KEYS.theme, t);
+}
+
+themeBtn.addEventListener('click', () => {
+  const current = htmlRoot.getAttribute('data-theme') || 'light';
+  applyAppTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+applyAppTheme(localStorage.getItem(DB_KEYS.theme) || 'light');
+
+/* ─── MOBILE DRAWER ─── */
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+
+/* ─── NAVIGATION ROUTING ─── */
+function showSection(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  const activeSec = document.getElementById(id);
+  if (activeSec) activeSec.classList.add('active');
+
+  // Nav highlights
+  document.querySelectorAll('.nav-center a').forEach(a => a.classList.remove('active'));
+  const dLink = document.getElementById('link-' + id);
+  if (dLink) dLink.classList.add('active');
+
+  document.querySelectorAll('#mobile-nav a').forEach(a => a.classList.remove('active'));
+  const mLink = document.getElementById('mob-link-' + id);
+  if (mLink) mLink.classList.add('active');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (id === 'dashboard') loadDashboard();
+  if (id === 'notes') renderSavedNotes();
+  if (id === 'quiz') renderSavedScores();
+  if (id === 'solver') renderDoubts();
+}
+
+/* ─── STORAGE HELPERS ─── */
+function getStorage(k) {
+  try { return JSON.parse(localStorage.getItem(k)) || []; }
+  catch(e) { return []; }
+}
+function setStorage(k, v) {
+  localStorage.setItem(k, JSON.stringify(v));
+}
+
+/* ─── STREAK TRACKING ─── */
+function calcStreak() {
+  const today = new Date().toDateString();
+  const last = localStorage.getItem(DB_KEYS.lastVisit);
+  let streak = parseInt(localStorage.getItem(DB_KEYS.streak) || '0');
+
+  if (last === today) return streak || 1;
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (last === yesterday.toDateString()) {
+    streak++;
+  } else {
+    streak = 1;
+  }
+  localStorage.setItem(DB_KEYS.streak, streak);
+  localStorage.setItem(DB_KEYS.lastVisit, today);
+  return streak;
+}
+
+/* ─── DASHBOARD ─── */
+function loadDashboard() {
+  const notes = getStorage(DB_KEYS.notes);
+  const quizzes = getStorage(DB_KEYS.quizzes);
+  const doubts = getStorage(DB_KEYS.doubts);
+  const streak = calcStreak();
+
+  document.getElementById('stat-notes').textContent = notes.length;
+  document.getElementById('stat-quizzes').textContent = quizzes.length;
+  document.getElementById('stat-doubts').textContent = doubts.length;
+
+  // Average Score
+  if (quizzes.length > 0) {
+    const sum = quizzes.reduce((acc, q) => acc + (q.percent || 0), 0);
+    const avg = Math.round(sum / quizzes.length);
+    document.getElementById('stat-avg-score').textContent = avg + '%';
+  } else {
+    document.getElementById('stat-avg-score').textContent = '0%';
+  }
+
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  // Recent feed
+  const feed = [
+    ...notes.map(n => ({ ts: n.ts, title: `Note saved: "${n.title}"`, icon: 'fas fa-file-alt', color: '#2563eb' })),
+    ...quizzes.map(q => ({ ts: q.ts, title: `Quiz completed: ${q.topic} (${q.score}/${q.total} - ${q.percent}%)`, icon: 'fas fa-vial', color: '#16a34a' })),
+    ...doubts.map(d => ({ ts: d.ts, title: `Doubt clarified: "${d.q.slice(0, 45)}..."`, icon: 'fas fa-question-circle', color: '#7c3aed' }))
+  ].sort((a,b) => b.ts - a.ts).slice(0, 6);
+
+  const container = document.getElementById('activity-items');
+  if (feed.length === 0) {
+    container.innerHTML = `<div class="empty-state"><i class="fas fa-history"></i><p>No study logs found yet. Start generating notes or taking quizzes!</p></div>`;
+    return;
+  }
+  container.innerHTML = feed.map(item => `
+    <div class="activity-item">
+      <div class="activity-icon" style="background:${item.color}20; color:${item.color};">
+        <i class="${item.icon}"></i>
+      </div>
+      <span style="color:var(--text); font-weight:500;">${escHtml(item.title)}</span>
+      <span>${formatTimeAgo(item.ts)}</span>
+    </div>
+  `).join('');
+}
+
+function formatTimeAgo(ts) {
+  const sec = Math.floor((Date.now() - ts) / 1000);
+  if (sec < 60) return 'just now';
+  if (sec < 3600) return `${Math.floor(sec/60)}m ago`;
+  if (sec < 86400) return `${Math.floor(sec/3600)}h ago`;
+  return `${Math.floor(sec/86400)}d ago`;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   AI SYNTHESIZER ENGINE (Structured, Clean, Student-Friendly Output)
+   ══════════════════════════════════════════════════════════════════ */
+function generateStructuredStudyNotes(topic, rawMaterial) {
+  const cleanTopic = (topic || 'Key Study Concept').trim();
+  const hasText = rawMaterial && rawMaterial.trim().length > 15;
+
+  let takeaways = [];
+  let breakdownPoints = [];
+  let commonMistake = '';
+
+  if (hasText) {
+    const rawSentences = rawMaterial.split(/[.!?\n]+/).map(s => s.trim()).filter(s => s.length > 10);
+    takeaways = rawSentences.slice(0, Math.min(3, rawSentences.length)).map((s, i) => {
+      return `<strong>Core takeaway ${i + 1}:</strong> ${s}.`;
+    });
+    if (takeaways.length === 0) {
+      takeaways.push(`<strong>Primary Concept:</strong> ${cleanTopic} is fundamental to understanding this course material.`);
+    }
+
+    const midPoints = rawSentences.slice(3, Math.min(7, rawSentences.length));
+    if (midPoints.length > 0) {
+      breakdownPoints = midPoints.map((p, idx) => `<strong>Step ${idx + 1}:</strong> ${p}`);
+    } else {
+      breakdownPoints = [
+        `<strong>Foundational Rules:</strong> Operates strictly under the verified principles of ${cleanTopic}.`,
+        `<strong>Variables & Inputs:</strong> Notice how changes in inputs determine the final observed outcome.`,
+        `<strong>Practical Application:</strong> Frequently tested in problem sets and analytical scenarios.`
+      ];
+    }
+    commonMistake = `Avoid overlooking baseline assumptions in ${cleanTopic}; pay close attention to boundary constraints and units!`;
+  } else {
+    takeaways = [
+      `<strong>Foundational Definition:</strong> ${cleanTopic} defines the systematic behavior and core properties within its academic domain.`,
+      `<strong>Governing Mechanism:</strong> Input variables directly influence system stability, energy states, and measured outputs.`,
+      `<strong>Real-World Relevance:</strong> Widely applied across practical scientific, analytical, and problem-solving scenarios.`
+    ];
+    breakdownPoints = [
+      `<strong>1. Core Concept Overview:</strong> Master the vocabulary, symbols, and standard formulas before tackling composite problems.`,
+      `<strong>2. System Dynamics:</strong> When conditions fluctuate, ${cleanTopic} responds through predictable equilibrium or reaction pathways.`,
+      `<strong>3. High-Yield Rule:</strong> Always identify the independent vs. dependent variables first.`
+    ];
+    commonMistake = `Do not confuse temporary fluctuations with permanent state changes when analyzing ${cleanTopic}. Always verify starting values!`;
+  }
+
+  // Plain-text version (for easy clipboard copy)
+  let plain = `=== ${cleanTopic.toUpperCase()} — COMPREHENSIVE REVISION NOTES ===\n\n`;
+  plain += `[1. EXECUTIVE SUMMARY]\n`;
+  plain += `A student-friendly revision guide for ${cleanTopic}, focusing on high-yield exam takeaways.\n\n`;
+  plain += `[2. KEY TAKEAWAYS]\n`;
+  takeaways.forEach(t => {
+    plain += `• ${t.replace(/<[^>]*>/g, '')}\n`;
+  });
+  plain += `\n[3. STEP-BY-STEP CONCEPT BREAKDOWN]\n`;
+  breakdownPoints.forEach(b => {
+    plain += `• ${b.replace(/<[^>]*>/g, '')}\n`;
+  });
+  plain += `\n[4. COMMON PITFALL TO AVOID]\n`;
+  plain += `⚠️ ${commonMistake}\n\n`;
+  plain += `[5. SELF-CHECK QUESTIONS]\n`;
+  plain += `1. What is the fundamental definition and purpose of ${cleanTopic}?\n`;
+  plain += `2. What primary mechanism drives change in this system?\n`;
+  plain += `3. How can you distinguish this concept from closely related principles?`;
+
+  // Rich HTML version for clear, modern visual layout
+  let html = `
+    <div class="note-doc-title">
+      <i class="fas fa-bookmark"></i>
+      <span>${escHtml(cleanTopic.toUpperCase())}</span>
+    </div>
+
+    <div class="note-card-box summary-box">
+      <div class="note-sec-title">
+        <i class="fas fa-bullseye"></i> Executive Summary
+      </div>
+      <p style="font-size:.9rem; color:var(--text); margin:0;">
+        Clear, structured notes synthesized for <strong>${escHtml(cleanTopic)}</strong>. Designed for fast retention and exam prep.
+      </p>
+    </div>
+
+    <div class="note-card-box">
+      <div class="note-sec-title">
+        <i class="fas fa-key" style="color:var(--primary);"></i> 1. High-Yield Key Takeaways
+      </div>
+      <ul class="note-bullet-list">
+        ${takeaways.map(t => `<li class="note-bullet-item"><i class="fas fa-check-circle"></i><div>${t}</div></li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="note-card-box">
+      <div class="note-sec-title">
+        <i class="fas fa-layer-group" style="color:var(--primary);"></i> 2. Concept Breakdown & Mechanics
+      </div>
+      <ul class="note-bullet-list">
+        ${breakdownPoints.map(b => `<li class="note-bullet-item"><i class="fas fa-arrow-right"></i><div>${b}</div></li>`).join('')}
+      </ul>
+      <div class="note-callout-warning">
+        <i class="fas fa-exclamation-triangle" style="margin-right:.4rem; color:var(--warning);"></i>
+        <strong>Common Exam Pitfall:</strong> ${escHtml(commonMistake)}
+      </div>
+    </div>
+
+    <div class="note-card-box">
+      <div class="note-sec-title">
+        <i class="fas fa-tasks" style="color:var(--primary);"></i> 3. Quick Self-Check Questions
+      </div>
+      <ol class="note-numbered-list">
+        <li>What is the fundamental definition and purpose of <strong>${escHtml(cleanTopic)}</strong>?</li>
+        <li>Which primary variable or factor triggers changes in this system?</li>
+        <li>How would you apply this principle in an exam problem or real-world example?</li>
+      </ol>
+    </div>
+  `;
+
+  return { plain, html };
+}
+
+/* ─── NOTES MANAGEMENT ─── */
+let currentActiveNoteId = null;
+let currentActiveNoteData = null; // Stores current generated note object
+
+document.getElementById('note-input').addEventListener('input', function() {
+  document.getElementById('note-char-count').textContent = `${this.value.length} / 5000`;
+});
+
+function updateNotesWorkflow() {
+  const topic = document.getElementById('note-topic').value.trim();
+  const material = document.getElementById('note-input').value.trim();
+  toggleStep('wf-step1', topic.length > 0);
+  toggleStep('wf-step2', material.length > 0);
+}
+function toggleStep(id, state) {
+  const el = document.getElementById(id);
+  if (el) {
+    if (state) el.classList.add('done');
+    else el.classList.remove('done');
+  }
+}
+
+async function generateSmartNotes() {
+  const topic = document.getElementById('note-topic').value.trim();
+  const material = document.getElementById('note-input').value.trim();
+
+  if (!topic && !material) {
+    toast('⚠️ Please enter a Topic or paste some study material.', 'warn');
+    return;
+  }
+
+  const btn = document.getElementById('generate-notes-btn');
+  if (btn && btn.disabled) return;
+  const originalBtnHtml = btn ? btn.innerHTML : '';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Notes...';
+  }
+
+  const panel = document.getElementById('preview-panel');
+  const box = document.getElementById('preview-content-box');
+  const status = document.getElementById('preview-status');
+  const actions = document.getElementById('preview-actions');
+
+  panel.classList.remove('has-content');
+  status.textContent = '— Consulting Gemini AI...';
+  box.className = '';
+  box.innerHTML = `
+    <div style="text-align:center; padding:2rem 0; color:var(--text-muted);">
+      <div class="spinner" style="margin:0 auto 1rem; width:28px; height:28px; border-width:3px;"></div>
+      <p style="font-weight:600; color:var(--text); margin-bottom:.3rem;">Generating structured study notes with Gemini...</p>
+      <p style="font-size:.82rem; color:var(--text-faint);">Synthesizing executive summary, takeaways, and self-check questions.</p>
+    </div>
+  `;
+  if (actions) actions.style.display = 'none';
+
+  toggleStep('wf-step3', true);
+  toggleStep('wf-step4', false);
+
+  try {
+    const res = await fetch('/api/notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, material })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || `Server responded with status ${res.status}`);
+    }
+
+    currentActiveNoteData = { plain: data.plain, html: data.html };
+
+    panel.classList.add('has-content');
+    status.textContent = '— Generated by Gemini AI & Ready';
+    box.className = 'study-note-render';
+    box.innerHTML = data.html;
+
+    if (actions) actions.style.display = 'flex';
+    toggleStep('wf-step4', true);
+    toast('✅ Notes generated successfully by Gemini!');
+  } catch (err) {
+    console.error('Notes generation error:', err);
+    panel.classList.remove('has-content');
+    status.textContent = '— Generation failed';
+    box.className = '';
+    box.innerHTML = `
+      <div style="text-align:center; padding:1.75rem 1rem; color:var(--danger);">
+        <i class="fas fa-exclamation-circle" style="font-size:2rem; margin-bottom:.75rem; display:block;"></i>
+        <h4 style="font-size:1rem; margin-bottom:.4rem; color:var(--danger);">Failed to Generate Notes</h4>
+        <p style="font-size:.85rem; color:var(--text-muted); max-width:480px; margin:0 auto 1rem;">
+          ${escHtml(err.message || 'Could not communicate with the EduSpark backend.')}
+        </p>
+        <button class="btn btn-sm btn-outline" onclick="generateSmartNotes()">
+          <i class="fas fa-redo"></i> Retry Generation
+        </button>
+      </div>
+    `;
+    if (actions) actions.style.display = 'none';
+    toggleStep('wf-step4', false);
+    toast(`❌ Error: ${err.message}`, 'danger');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHtml;
+    }
+  }
+}
+
+function copyPreviewNotes() {
+  if (!currentActiveNoteData) return;
+  navigator.clipboard.writeText(currentActiveNoteData.plain).then(() => {
+    toast('📋 Clean structured notes copied to clipboard!');
+  });
+}
+
+function discardPreview() {
+  const panel = document.getElementById('preview-panel');
+  panel.classList.remove('has-content');
+  document.getElementById('preview-status').textContent = '— Waiting for input';
+  document.getElementById('preview-content-box').innerHTML = `
+    <div class="preview-placeholder">
+      <i class="fas fa-robot" style="font-size:1.6rem; display:block; margin-bottom:.5rem; opacity:.4;"></i>
+      Synthesized notes will appear here with instant copy and library save options.
+    </div>`;
+  document.getElementById('preview-actions').style.display = 'none';
+  toggleStep('wf-step3', false);
+  toggleStep('wf-step4', false);
+}
+
+function savePreviewToLibrary() {
+  const title = document.getElementById('note-topic').value.trim() || 'Untitled Study Note';
+  if (!currentActiveNoteData) return toast('⚠️ Nothing to save.', 'warn');
+
+  const notes = getStorage(DB_KEYS.notes);
+  const newNote = {
+    id: Date.now(),
+    title,
+    html: currentActiveNoteData.html,
+    plain: currentActiveNoteData.plain,
+    ts: Date.now()
+  };
+  notes.unshift(newNote);
+  setStorage(DB_KEYS.notes, notes);
+
+  discardPreview();
+  clearNoteInputs();
+  renderSavedNotes();
+  openNoteDetail(newNote);
+  toast('✅ Saved to your notes library!');
+  calcStreak();
+}
+
+function clearNoteInputs() {
+  document.getElementById('note-topic').value = '';
+  document.getElementById('note-input').value = '';
+  document.getElementById('note-char-count').textContent = '0 / 5000';
+  currentActiveNoteData = null;
+  toggleStep('wf-step1', false);
+  toggleStep('wf-step2', false);
+}
+
+function renderSavedNotes(query) {
+  let notes = getStorage(DB_KEYS.notes);
+  document.getElementById('notes-count-label').textContent = `${notes.length} saved`;
+
+  if (query) {
+    const q = query.toLowerCase();
+    notes = notes.filter(n => n.title.toLowerCase().includes(q) || (n.plain && n.plain.toLowerCase().includes(q)));
+  }
+
+  const container = document.getElementById('notes-list');
+  if (notes.length === 0) {
+    container.innerHTML = query ?
+      `<div class="empty-state"><p>No notes matching "${escHtml(query)}"</p></div>` :
+      `<div class="empty-state"><i class="fas fa-sticky-note"></i><p>No saved notes yet.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = notes.map(n => `
+    <div class="note-item ${n.id === currentActiveNoteId ? 'active' : ''}" onclick='openNoteDetail(${JSON.stringify(n).replace(/'/g, "&#39;")})'>
+      <div style="font-size:.85rem; color:var(--primary); padding-top:2px;"><i class="fas fa-file-alt"></i></div>
+      <div class="note-item-body">
+        <h5>${escHtml(n.title)}</h5>
+        <p>${formatTimeAgo(n.ts)} &middot; Structured Note</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openNoteDetail(note) {
+  currentActiveNoteId = note.id;
+  currentActiveNoteData = { html: note.html || note.content, plain: note.plain || note.content };
+  document.getElementById('viewer-title').textContent = note.title;
+
+  const contentBox = document.getElementById('viewer-content');
+  if (note.html) {
+    contentBox.innerHTML = note.html;
+  } else {
+    contentBox.textContent = note.content;
+  }
+
+  document.getElementById('viewer-meta').textContent = `Saved on ${new Date(note.ts).toLocaleString()}`;
+  const viewer = document.getElementById('note-viewer');
+  viewer.style.display = 'block';
+  viewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  renderSavedNotes(document.getElementById('notes-search').value);
+}
+
+function copyViewerNote() {
+  const note = getStorage(DB_KEYS.notes).find(n => n.id === currentActiveNoteId);
+  const text = (note && note.plain) ? note.plain : document.getElementById('viewer-content').innerText;
+  navigator.clipboard.writeText(text).then(() => toast('📋 Structured note copied to clipboard!'));
+}
+
+function editSelectedNote() {
+  if (!currentActiveNoteId) return;
+  const note = getStorage(DB_KEYS.notes).find(n => n.id === currentActiveNoteId);
+  if (!note) return;
+  document.getElementById('note-topic').value = note.title;
+  document.getElementById('note-input').value = note.plain || note.content || '';
+  updateNotesWorkflow();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('✏️ Loaded note into editor. Generate or edit to save again.');
+}
+
+function deleteCurrentNote() {
+  if (!currentActiveNoteId) return;
+  if (!confirm('Are you sure you want to delete this saved note?')) return;
+  const notes = getStorage(DB_KEYS.notes).filter(n => n.id !== currentActiveNoteId);
+  setStorage(DB_KEYS.notes, notes);
+  currentActiveNoteId = null;
+  document.getElementById('note-viewer').style.display = 'none';
+  renderSavedNotes();
+  toast('🗑️ Note deleted successfully.');
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   INTERACTIVE MULTIPLE-CHOICE QUIZ SYSTEM
+   ══════════════════════════════════════════════════════════════════ */
+let currentQuizSession = null;
+
+// Dynamic question generator bank
+function generateQuizQuestions(topic, difficulty, count) {
+  const baseTopic = topic.trim() || 'General Science';
+  const templates = [
+    {
+      q: `What is the primary defining characteristic of ${baseTopic}?`,
+      opts: [
+        `It operates under consistent, observable principles within its specific domain.`,
+        `It violates the foundational laws of conservation of mass and energy.`,
+        `It is entirely random and cannot be measured experimentally.`,
+        `It only applies in hypothetical theoretical dimensions.`
+      ],
+      correct: 0,
+      explain: `${baseTopic} is established on verified principles governed by domain-specific rules.`
+    },
+    {
+      q: `Which of the following components or mechanisms plays the most central role in ${baseTopic}?`,
+      opts: [
+        `An arbitrary auxiliary variable with negligible impact.`,
+        `The primary driving catalyst or governing core equation.`,
+        `External interference that dismantles the entire framework.`,
+        `A static parameter that cannot be altered or observed.`
+      ],
+      correct: 1,
+      explain: `The core mechanism or driving equation directs the behavior of ${baseTopic}.`
+    },
+    {
+      q: `When analyzing practical difficulties in ${baseTopic}, what is the standard scientific approach?`,
+      opts: [
+        `Ignoring baseline assumptions and working in isolation.`,
+        `Establishing control parameters and measuring deviations systematically.`,
+        `Assuming initial values fluctuate arbitrarily without cause.`,
+        `Discarding empirical observations in favor of subjective bias.`
+      ],
+      correct: 1,
+      explain: `Empirical observation and parameter isolation form the foundation of analyzing ${baseTopic}.`
+    },
+    {
+      q: `What occurs when the equilibrium or primary threshold in ${baseTopic} is exceeded?`,
+      opts: [
+        `The system immediately halts all interactions permanently.`,
+        `Dynamic adjustment or phase transition takes place to stabilize the state.`,
+        `All historical data points become inverse to reality.`,
+        `No measurable changes can ever be detected.`
+      ],
+      correct: 1,
+      explain: `Exceeding thresholds in ${baseTopic} triggers dynamic stabilization or transitions.`
+    },
+    {
+      q: `Why is the study of ${baseTopic} considered essential in advanced academic curricula?`,
+      opts: [
+        `It supplies transferable conceptual models used across adjacent scientific fields.`,
+        `It replaces all necessity for mathematical analysis.`,
+        `It has no relevance to real-world technological challenges.`,
+        `It requires memorization without conceptual understanding.`
+      ],
+      correct: 0,
+      explain: `Knowledge of ${baseTopic} unlocks cross-disciplinary problem-solving strategies.`
+    }
+  ];
+
+  return templates.slice(0, parseInt(count) || 5);
+}
+
+async function startInteractiveQuiz() {
+  const topic = document.getElementById('quiz-topic').value.trim();
+  if (!topic) {
+    toast('⚠️ Please specify a quiz topic.', 'warn');
+    return;
+  }
+  const difficulty = document.getElementById('quiz-difficulty').value;
+  const qcount = parseInt(document.getElementById('quiz-qcount').value, 10);
+
+  const btn = document.getElementById('start-quiz-btn');
+  if (btn && btn.disabled) return;
+  const originalBtnHtml = btn ? btn.innerHTML : '';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Quiz with Gemini...';
+  }
+
+  try {
+    const res = await fetch('/api/quiz', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, difficulty, count: qcount })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || `Server responded with status ${res.status}`);
+    }
+
+    if (!Array.isArray(data.questions) || data.questions.length === 0) {
+      throw new Error('Received empty question set from server.');
+    }
+
+    currentQuizSession = {
+      id: Date.now(),
+      topic: data.topic || topic,
+      difficulty: data.difficulty || difficulty,
+      questions: data.questions,
+      currentIndex: 0,
+      userAnswers: {},
+      score: 0,
+      ts: Date.now()
+    };
+
+    document.getElementById('quiz-config-card').style.display = 'none';
+    document.getElementById('quiz-results').style.display = 'none';
+    document.getElementById('quiz-runner').style.display = 'block';
+
+    renderCurrentQuestion();
+    toast('✅ Quiz generated successfully by Gemini!');
+  } catch (err) {
+    console.error('Quiz generation error:', err);
+    toast(`❌ Quiz generation failed: ${err.message}`, 'danger');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHtml;
+    }
+  }
+}
+
+function renderCurrentQuestion() {
+  const s = currentQuizSession;
+  const q = s.questions[s.currentIndex];
+  const total = s.questions.length;
+
+  document.getElementById('q-counter').textContent = `Question ${s.currentIndex + 1} of ${total}`;
+  const badge = document.getElementById('q-badge');
+  badge.textContent = s.difficulty;
+  badge.className = `badge badge-${s.difficulty.toLowerCase()}`;
+
+  // Progress bar
+  const progressPercent = ((s.currentIndex) / total) * 100;
+  document.getElementById('quiz-progress-fill').style.width = `${progressPercent}%`;
+
+  document.getElementById('q-prompt').textContent = q.q;
+
+  const optionsBox = document.getElementById('q-options-container');
+  optionsBox.innerHTML = '';
+
+  const prefixes = ['A', 'B', 'C', 'D'];
+  q.opts.forEach((optText, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `
+      <div class="option-prefix">${prefixes[idx]}</div>
+      <span>${escHtml(optText)}</span>
+    `;
+    btn.onclick = () => selectOption(idx);
+    optionsBox.appendChild(btn);
+  });
+
+  const nextBtn = document.getElementById('next-q-btn');
+  nextBtn.disabled = true;
+  nextBtn.textContent = (s.currentIndex === total - 1) ? 'Submit Quiz' : 'Next Question';
+}
+
+function selectOption(selectedIdx) {
+  const s = currentQuizSession;
+  const q = s.questions[s.currentIndex];
+
+  s.userAnswers[s.currentIndex] = selectedIdx;
+
+  const buttons = document.querySelectorAll('.option-btn');
+  buttons.forEach((btn, idx) => {
+    btn.disabled = true;
+    if (idx === q.correct) {
+      btn.classList.add('correct');
+    } else if (idx === selectedIdx) {
+      btn.classList.add('incorrect');
+    }
+  });
+
+  if (selectedIdx === q.correct) {
+    s.score++;
+  }
+
+  document.getElementById('next-q-btn').disabled = false;
+}
+
+function nextQuestion() {
+  const s = currentQuizSession;
+  s.currentIndex++;
+
+  if (s.currentIndex < s.questions.length) {
+    renderCurrentQuestion();
+  } else {
+    finishQuiz();
+  }
+}
+
+function finishQuiz() {
+  const s = currentQuizSession;
+  document.getElementById('quiz-progress-fill').style.width = '100%';
+  document.getElementById('quiz-runner').style.display = 'none';
+
+  const percent = Math.round((s.score / s.questions.length) * 100);
+  s.percent = percent;
+
+  // Persist to scores history
+  const history = getStorage(DB_KEYS.quizzes);
+  history.unshift({
+    id: s.id,
+    topic: s.topic,
+    difficulty: s.difficulty,
+    score: s.score,
+    total: s.questions.length,
+    percent: percent,
+    ts: Date.now()
+  });
+  setStorage(DB_KEYS.quizzes, history);
+
+  // Results screen display
+  document.getElementById('result-score-num').textContent = `${percent}%`;
+  document.getElementById('result-detail').textContent =
+    `You scored ${s.score} out of ${s.questions.length} questions correctly.`;
+
+  const feedback = document.getElementById('result-feedback-title');
+  if (percent >= 80) feedback.textContent = '🌟 Outstanding Mastery!';
+  else if (percent >= 60) feedback.textContent = '👍 Solid Effort! Keep Practicing.';
+  else feedback.textContent = '📚 Review Recommended!';
+
+  document.getElementById('quiz-results').style.display = 'block';
+  renderSavedScores();
+  calcStreak();
+}
+
+function retryCurrentQuiz() {
+  if (!currentQuizSession) return;
+  currentQuizSession.currentIndex = 0;
+  currentQuizSession.userAnswers = {};
+  currentQuizSession.score = 0;
+  document.getElementById('quiz-results').style.display = 'none';
+  document.getElementById('quiz-runner').style.display = 'block';
+  renderCurrentQuestion();
+}
+
+function quitActiveQuiz() {
+  if (!confirm('Quit current quiz? Unsaved progress will be lost.')) return;
+  resetQuizToConfig();
+}
+
+function resetQuizToConfig() {
+  document.getElementById('quiz-runner').style.display = 'none';
+  document.getElementById('quiz-results').style.display = 'none';
+  document.getElementById('quiz-config-card').style.display = 'block';
+}
+
+function renderSavedScores() {
+  const scores = getStorage(DB_KEYS.quizzes);
+  const tbody = document.getElementById('scores-tbody');
+  const emptyState = document.getElementById('empty-scores-state');
+  document.getElementById('quiz-history-count').textContent = `${scores.length} attempts logged`;
+
+  if (scores.length === 0) {
+    tbody.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  tbody.innerHTML = scores.map(sc => `
+    <tr>
+      <td style="font-weight:600; color:var(--text);">${escHtml(sc.topic)}</td>
+      <td><span class="badge badge-${sc.difficulty.toLowerCase()}">${sc.difficulty}</span></td>
+      <td>
+        <strong style="color:${sc.percent >= 70 ? 'var(--success)' : (sc.percent >= 50 ? 'var(--warning)' : 'var(--danger)')}">
+          ${sc.score}/${sc.total} (${sc.percent}%)
+        </strong>
+      </td>
+      <td style="color:var(--text-faint); font-size:.82rem;">${new Date(sc.ts).toLocaleDateString()}</td>
+      <td>
+        <button onclick="deleteScoreEntry(${sc.id})" style="background:none; border:none; color:var(--text-faint); cursor:pointer;" title="Delete score">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function deleteScoreEntry(id) {
+  const scores = getStorage(DB_KEYS.quizzes).filter(s => s.id !== id);
+  setStorage(DB_KEYS.quizzes, scores);
+  renderSavedScores();
+  toast('🗑️ Score record removed.');
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   AI DOUBT SOLVER
+   ══════════════════════════════════════════════════════════════════ */
+document.getElementById('doubt-input').addEventListener('input', function() {
+  document.getElementById('doubt-chars').textContent = `${this.value.length} / 1000`;
+});
+
+async function solveDoubt() {
+  const question = document.getElementById('doubt-input').value.trim();
+  if (!question) {
+    toast('⚠️ Please type your question or concept struggle.', 'warn');
+    return;
+  }
+
+  const btn = document.getElementById('solve-doubt-btn');
+  if (btn && btn.disabled) return;
+  const originalBtnHtml = btn ? btn.innerHTML : '';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Solving Doubt with Gemini...';
+  }
+
+  try {
+    const res = await fetch('/api/doubt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || `Server responded with status ${res.status}`);
+    }
+
+    const explanation = data.explanation || 'No explanation returned.';
+
+    const doubts = getStorage(DB_KEYS.doubts);
+    const newEntry = {
+      id: Date.now(),
+      q: question,
+      a: explanation.trim(),
+      ts: Date.now()
+    };
+    doubts.unshift(newEntry);
+    setStorage(DB_KEYS.doubts, doubts);
+
+    document.getElementById('doubt-input').value = '';
+    document.getElementById('doubt-chars').textContent = '0 / 1000';
+    renderDoubts();
+    toast('✅ Doubt solved and saved to archive!');
+    calcStreak();
+  } catch (err) {
+    console.error('Doubt solver error:', err);
+    toast(`❌ Could not solve doubt: ${err.message}`, 'danger');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHtml;
+    }
+  }
+}
+
+function renderDoubts() {
+  const doubts = getStorage(DB_KEYS.doubts);
+  const box = document.getElementById('doubts-container');
+
+  if (doubts.length === 0) {
+    box.innerHTML = `
+      <div class="empty-state" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);">
+        <i class="fas fa-comment-dots"></i>
+        <p>No doubts solved yet. Enter a concept above to get an instant explanation.</p>
+      </div>`;
+    return;
+  }
+
+  box.innerHTML = doubts.map(d => `
+    <div class="doubt-card">
+      <div class="doubt-q"><i class="fas fa-question" style="color:var(--primary); margin-right:.4rem;"></i>${escHtml(d.q)}</div>
+      <div class="doubt-a"><pre style="white-space:pre-wrap; font-family:inherit;">${escHtml(d.a)}</pre></div>
+      <div class="doubt-meta">
+        <span>${formatTimeAgo(d.ts)}</span>
+        <button onclick="deleteDoubtEntry(${d.id})" style="background:none; border:none; color:var(--text-faint); cursor:pointer;" title="Delete">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteDoubtEntry(id) {
+  const doubts = getStorage(DB_KEYS.doubts).filter(d => d.id !== id);
+  setStorage(DB_KEYS.doubts, doubts);
+  renderDoubts();
+  toast('🗑️ Removed from archive.');
+}
+
+/* ─── RESET ALL DATA ─── */
+function clearAllData() {
+  if (!confirm('This will permanently delete all your saved notes, quizzes, scores, and doubts. Proceed?')) return;
+  Object.values(DB_KEYS).forEach(k => localStorage.removeItem(k));
+  applyAppTheme('light');
+  loadDashboard();
+  toast('🗑️ All data successfully reset.');
+}
+
+/* ─── UTILITIES ─── */
+function toast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.style.background = type === 'warn' ? 'var(--warning)' : (type === 'danger' ? 'var(--danger)' : 'var(--text)');
+  t.style.color = '#fff';
+  t.innerHTML = msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ─── APP INITIALIZATION ─── */
+(function bootstrap() {
+  calcStreak();
+  showSection('landing');
+  document.getElementById('link-landing').classList.add('active');
+  document.getElementById('mob-link-landing').classList.add('active');
+})();
+</script>
+</body>
+</html>
